@@ -51,10 +51,10 @@ const GeneratePageContent = () => {
         //  Relative path (works perfectly everywhere!)
         const r = await fetch("/api/add", requestOptions)
         const result = await r.json()
-        if(result.success){
-             toast.success(result.message)
+        if (result.success) {
+            toast.success(result.message)
         }
-        else{
+        else {
             toast.error(result.message)
         }
     }
@@ -86,7 +86,7 @@ const GeneratePageContent = () => {
                         <div className="mx-4 flex flex-col">
                             <input value={pic || ''} onChange={e => { setpic(e.target.value) }} className="bg-white my-2 mx-2 px-4 py-2 focus:outline-pink-400 rounded-4xl" type="text" placeholder='Enter link to your Picture' />
                             <input value={desc || ''} onChange={e => { setdesc(e.target.value) }} className="bg-white my-2 mx-2 px-4 py-2 focus:outline-pink-400 rounded-4xl" type="text" placeholder='Enter Description' />
-                            <button disabled={pic=="" || handle=="" || links[0].linktext==""} onClick={() => { submitlinks() }} className="disabled:bg-slate-500 mx-2 bg-sky-900 text-white p-5 py-2 my-5 rounded-4xl w-fit font-bold">Create your BitLink</button>
+                            <button disabled={pic == "" || handle == "" || links[0].linktext == ""} onClick={() => { submitlinks() }} className="disabled:bg-slate-500 mx-2 bg-sky-900 text-white p-5 py-2 my-5 rounded-4xl w-fit font-bold">Create your BitLink</button>
                         </div>
                     </div>
                 </div>
