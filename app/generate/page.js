@@ -1,142 +1,110 @@
-// "use client"
+'use client'
 
-export const dynamic = 'force-dynamic';
-import React, { useState, Suspense } from 'react'
+import React, { useState } from 'react'
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import { useSearchParams } from 'next/navigation'
 
-// 1. Your core component that uses searchParams goes here
-function GenerateForm() {
-  const searchParams = useSearchParams()
-  const handleFromUrl = searchParams.get('handle') || ""
+const page = () => {
+    const searchparams=useSearchParams()
+    // const [link, setlink] = useState("")
+    // const [linktext, setlinktext] = useState("")
+    const [links, setlinks] = useState([{ link: "", linktext: "" }])
+    const [handle, sethandle] = useState(searchparams.get('handle'))
+    const [pic, setpic] = useState("")
+    const [desc, setdesc] = useState("")
+    const handlechange = (index, link, linktext) => {
+        setlinks((initiallink) => {
+            return initiallink.map((item, i) => {
+                if (i == index) {
+                    return { link, linktext }
+                }
 
-  // State management for your form fields
-  const [handle, setHandle] = useState(handleFromUrl)
-  const [links, setLinks] = useState([{ text: "", url: "" }])
-  const [picture, setPicture] = useState("")
-  const [description, setDescription] = useState("")
+                else {
+                    return item
+                }
 
-  const handleAddLink = () => {
-    setLinks([...links, { text: "", url: "" }])
-  }
+            })
+        })
+    }
 
-  const handleLinkChange = (index, field, value) => {
-    const updatedLinks = [...links]
-    updatedLinks[index][field] = value
-    setLinks(updatedLinks)
-  }
+    const addlink = () => {
+            setlinks(links.concat([{ link: "", linktext: "" }]))
+        }
+    const submitlinks = async () => {
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // Handle your submission API logic to /api/add here
-    console.log({ handle, links, picture, description })
-  }
+        const raw = JSON.stringify({
+            "links": links,
+            "handle": handle,
+            "pic": pic,
+            "desc": desc
+        });
+        console.log(raw);
 
-  return (
-    <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-      {/* Left Column: Form Setup */}
-      <div>
-        <h1 className="text-3xl font-bold text-indigo-950 mb-6">Create your BitLink</h1>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Step 1 */}
-          <div>
-            <label className="block text-lg font-semibold text-indigo-950 mb-2">
-              Step 1: Claim your Handle
-            </label>
-            <input 
-              type="text" 
-              value={handle}
-              onChange={(e) => setHandle(e.target.value)}
-              placeholder="Choose a Handle" 
-              className="w-full max-w-xs px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
 
-          {/* Step 2 */}
-          <div>
-            <label className="block text-lg font-semibold text-indigo-950 mb-2">
-              Step 2: Add Links
-            </label>
-            {links.map((link, index) => (
-              <div key={index} className="flex gap-2 mb-2 max-w-md">
-                <input 
-                  type="text" 
-                  placeholder="Enter link text" 
-                  value={link.text}
-                  onChange={(e) => handleLinkChange(index, 'text', e.target.value)}
-                  className="w-1/2 px-4 py-2 border rounded-full focus:outline-none"
-                />
-                <input 
-                  type="text" 
-                  placeholder="Enter link" 
-                  value={link.url}
-                  onChange={(e) => handleLinkChange(index, 'url', e.target.value)}
-                  className="w-1/2 px-4 py-2 border rounded-full focus:outline-none"
-                />
-              </div>
-            ))}
-            <button 
-              type="button"
-              onClick={handleAddLink}
-              className="mt-2 bg-teal-900 text-white px-4 py-2 rounded-full font-medium hover:bg-teal-800 transition"
-            >
-              + Add Link
-            </button>
-          </div>
+        const requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: raw,
+            redirect: "follow"
+        };
 
-          {/* Step 3 */}
-          <div className="space-y-3">
-            <label className="block text-lg font-semibold text-indigo-950">
-              Step 3: Add a picture and Description
-            </label>
-            <input 
-              type="text" 
-              placeholder="Enter link to your Picture" 
-              value={picture}
-              onChange={(e) => setPicture(e.target.value)}
-              className="w-full max-w-md px-4 py-2 border rounded-full focus:outline-none"
-            />
-            <input 
-              type="text" 
-              placeholder="Enter Description" 
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full max-w-md px-4 py-2 border rounded-full focus:outline-none"
-            />
-          </div>
+        const r = await fetch("http://localhost:3000/api/add", requestOptions)
+        const result = await r.json()
+        // toast(result.message)
+        if(result.success){
+                 toast.success(result.message)
+        }
+        else{
+            toast.error(result.message)
+        }
+        // setlink("")
+        // setlinktext("")
 
-          <button 
-            type="submit"
-            className="bg-slate-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-slate-700 transition"
-          >
-            Create your BitLink
-          </button>
-        </form>
-      </div>
 
-      {/* Right Column: Decorative Vector graphics placeholder */}
-      <div className="hidden md:block">
-        <div className="bg-purple-900 rounded-2xl p-8 text-white min-h-[400px] flex flex-col justify-between relative overflow-hidden">
-          {/* You can replace this wrapper with your absolute positioned mock image elements */}
-          <div className="z-10">
-            <span className="bg-teal-400 text-purple-950 font-bold px-3 py-1 rounded-full text-xs">GAME OVER</span>
-          </div>
-          <div className="absolute right-0 bottom-0 opacity-80">
-            {/* Put your image elements here */}
-          </div>
+    }
+    return (
+        <div className="bg-[#E9C0E9] min-h-screen grid grid-cols-2 pt-15">
+
+            <div className="col1 flex flex-col text-gray-900 justify-center items-center">
+                <div className="flex flex-col gap-5 my-8">
+                    <h1 className='font-bold text-5xl'> Create your BitTree</h1>
+                    <div className="item">
+                        <h2 className='font-semibold text-2xl'>Step 1: Claim your Handle</h2>
+                        <div className="mx-4">
+                            <input value={handle || ''} onChange={e => { sethandle(e.target.value) }} className="bg-white my-2 px-4 py-2 focus:outline-pink-400 rounded-4xl" type="text" name=" " id="" placeholder='Choose a Handle' />
+                        </div>
+                    </div>
+                    <div className="item">
+                        <h2 className='font-semibold text-2xl'>Step 2: Add Links</h2>
+
+                        {links && links.map((item, index) => {
+                            return <div key={index} className="mx-4">
+                                <input value={item.linktext || ''} onChange={e => { handlechange(index, item.link, e.target.value) }} className="bg-white my-2 mx-2 px-4 py-2 focus:outline-pink-400 rounded-4xl" type="text" name=" " id="" placeholder='Enter link text' />
+                                <input value={item.link || ''} onChange={e => { handlechange(index, e.target.value, item.linktext) }} className="bg-white my-2 mx-2 px-4 py-2 focus:outline-pink-400 rounded-4xl" type="text" name=" " id="" placeholder='Enter link ' />
+                            </div>
+                        })}
+                        <button onClick={() => addlink()} className="mx-2 bg-sky-900 text-white p-5 py-2 rounded-4xl font-bold"> + Add Link</button>
+                    </div>
+                    <div className="item">
+                        <h2 className='font-semibold text-2xl'>Step 3: Add a picture and Description</h2>
+                        <div className="mx-4 flex flex-col">
+                            <input value={pic || ''} onChange={e => { setpic(e.target.value) }} className="bg-white my-2 mx-2 px-4 py-2 focus:outline-pink-400 rounded-4xl" type="text" name=" " id="" placeholder='Enter link to your Picture' />
+                            <input value={desc || ''} onChange={e => { setdesc(e.target.value) }} className="bg-white my-2 mx-2 px-4 py-2 focus:outline-pink-400 rounded-4xl" type="text" name=" " id="" placeholder='Enter Description' />
+                            <button disabled={pic=="" || handle=="" || links[0].linktext==""} onClick={() => { submitlinks() }} className="disabled:bg-slate-500 mx-2 bg-sky-900 text-white p-5 py-2 my-5 rounded-4xl w-fit font-bold">Create your BitLink</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className="col2 w-full h-screen bg-[#E9C0E9]">
+                <img alt="Promotional Banner" className="h-full object-contain" src="/generate.png"></img> </div>
+
+            <ToastContainer />
         </div>
-      </div>
-    </div>
-  )
+    )
 }
 
-// 2. Main structural page layout featuring your padding and Suspense boundary wrapper
-export default function Generate() {
-  return (
-    <main className="pt-40 pb-12 px-6 min-h-screen bg-pink-200">
-      <Suspense fallback={<div className="text-center text-indigo-950 font-semibold">Loading generator template...</div>}>
-        <GenerateForm />
-      </Suspense>
-    </main>
-  )
-}
+export default page
