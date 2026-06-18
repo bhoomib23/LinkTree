@@ -48,7 +48,8 @@ const GeneratePageContent = () => {
             redirect: "follow"
         };
 
-        const r = await fetch("http://localhost:3000/api/add", requestOptions)
+        //  Relative path (works perfectly everywhere!)
+        const r = await fetch("/api/add", requestOptions)
         const result = await r.json()
         if(result.success){
              toast.success(result.message)
